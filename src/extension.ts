@@ -37,10 +37,12 @@ export function activate(context: ExtensionContext) {
 			window.showErrorMessage('Please provide a template path in the configuration!');
 			return;
 		}
+		
+		const configFileExtension = config.get<string>('fileExtension');
 
 		let templatePath = path.join(currentDirectory, configTemplatePath, `${match}`);
-		if (!templatePath.endsWith('.njk')) {
-			templatePath = templatePath.concat('.njk');
+		if (!templatePath.endsWith(configFileExtension ?? '.html')) {
+			templatePath = templatePath.concat(configFileExtension ?? '.html');
 		}
 
 		try {
@@ -50,8 +52,6 @@ export function activate(context: ExtensionContext) {
 			window.showErrorMessage('Could not find template!', templatePath);
 			return;
 		}
-		
-		window.showInformationMessage('Will navigate to template!');
 	});
 
 	workspace.onDidOpenTextDocument((e: TextDocument) => {

@@ -4,6 +4,10 @@
   "description": "Navigate into templates made easy",
   "publisher": "ricdotnet",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ricdotnet/template-lens"
+  },
   "engines": {
     "vscode": "^1.89.0"
   },
