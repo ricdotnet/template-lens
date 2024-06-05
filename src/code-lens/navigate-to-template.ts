@@ -1,4 +1,4 @@
-import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event } from "vscode";
+import { CodeLensProvider, TextDocument, CodeLens, Range, Command } from "vscode";
 
 export class NavigateToTemplate implements CodeLensProvider {
   private range: Range;

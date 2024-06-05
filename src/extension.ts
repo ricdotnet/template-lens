@@ -21,7 +21,7 @@ export function activate(context: ExtensionContext) {
 		const stringMatcher = /(["'`])(?:(?=(\\?))\2.)*?\1|([a-zA-Z0-9\-_/]+\/[a-zA-Z0-9\-_/]+)/g;
 		const matches = line.text.match(stringMatcher);
 		
-		if (!matches || !matches.length) {
+		if (!matches?.length) {
 			return;
 		}
 
@@ -59,19 +59,7 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 		
-		const fileName = e.fileName.split('\\').at(-1);
-		const pattern = `**/${fileName}`;
-
-		e.getText().split('\n').forEach(async (line: string, index: number) => {
-			if (line.includes('res.render(')) {
-				const codeLensProvider = new NavigateToTemplate(new Range(index, 0, index, 0), index);
-				const codeLensDisposable = languages.registerCodeLensProvider({ pattern }, codeLensProvider);
-				
-				context.subscriptions.push(codeLensDisposable);
-				
-				codeLensProviders.set(e.fileName + line.toString(), codeLensDisposable);
-			}
-		});
+		registerCodeLensProviders(e, context);
 	});
 	
 	workspace.onDidCloseTextDocument((e: TextDocument) => {
@@ -79,16 +67,11 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 		
-		codeLensProviders.forEach((disposable, key) => {
-			if (key.includes(e.fileName)) {
-				disposable.dispose();
-				codeLensProviders.delete(key);
-			}
-		});
+		resetCodeLensProviders(e);
 	});
 	
 	workspace.onDidChangeTextDocument((e: TextDocumentChangeEvent) => {
-		console.log(e.reason);
+		registerCodeLensProviders(e.document, context);
 	});
 
 	context.subscriptions.push(disposable);
@@ -97,4 +80,31 @@ export function activate(context: ExtensionContext) {
 export function deactivate() {
 	codeLensProviders.forEach(disposable => disposable.dispose());
 	codeLensProviders.clear();
+}
+
+function registerCodeLensProviders(e: TextDocument, context: ExtensionContext) {
+	const fileName = e.fileName.split('\\').at(-1);
+	const pattern = `**/${fileName}`;
+
+	resetCodeLensProviders(e);
+
+	e.getText().split('\n').forEach(async (line: string, index: number) => {
+		if (line.includes('res.render(')) {
+			const codeLensProvider = new NavigateToTemplate(new Range(index, 0, index, 0), index);
+			const codeLensDisposable = languages.registerCodeLensProvider({ pattern }, codeLensProvider);
+			
+			context.subscriptions.push(codeLensDisposable);
+			
+			codeLensProviders.set(e.fileName + line.toString(), codeLensDisposable);
+		}
+	});
+}
+
+function resetCodeLensProviders(e: TextDocument) {
+	codeLensProviders.forEach((disposable, key) => {
+		if (key.includes(e.fileName)) {
+			disposable.dispose();
+			codeLensProviders.delete(key);
+		}
+	});
 }
