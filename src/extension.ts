@@ -95,7 +95,7 @@ function registerCodeLensProviders(e: TextDocument, context: ExtensionContext) {
 			
 			context.subscriptions.push(codeLensDisposable);
 			
-			codeLensProviders.set(e.fileName + line.toString(), codeLensDisposable);
+			codeLensProviders.set(`${e.fileName}-${index}`, codeLensDisposable);
 		}
 	});
 }
