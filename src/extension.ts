@@ -89,7 +89,7 @@ function registerCodeLensProviders(e: TextDocument, context: ExtensionContext) {
 	resetCodeLensProviders(e);
 
 	e.getText().split('\n').forEach(async (line: string, index: number) => {
-		if (line.includes('res.render(')) {
+		if (line.includes('res.render(') && !isComment(line)) {
 			const codeLensProvider = new NavigateToTemplate(new Range(index, 0, index, 0), index);
 			const codeLensDisposable = languages.registerCodeLensProvider({ pattern }, codeLensProvider);
 			
@@ -107,4 +107,8 @@ function resetCodeLensProviders(e: TextDocument) {
 			codeLensProviders.delete(key);
 		}
 	});
+}
+
+function isComment(line: string) {
+	return line.trim().startsWith('//');
 }
